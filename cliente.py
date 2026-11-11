@@ -1,6 +1,5 @@
 """
 Módulo: cliente.py
-Responsable: Integrante 1
 Descripción: Clase Cliente con encapsulación de datos personales y
 validaciones estrictas de nombre, documento y correo.
 """
