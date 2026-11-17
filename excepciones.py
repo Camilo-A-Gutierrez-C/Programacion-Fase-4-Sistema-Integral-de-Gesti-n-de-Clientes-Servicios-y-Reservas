@@ -1,57 +1,65 @@
 """
 Módulo: excepciones.py
-Descripción: Define la jerarquía de excepciones personalizadas de Software FJ.
-Todas heredan de SoftwareFJError, de modo que el sistema pueda capturar
-cualquier error propio con un solo "except SoftwareFJError".
+
+Una "excepción personalizada" es un tipo de error propio del sistema.
+Así, en vez de un error genérico, el programa dice exactamente QUÉ salió mal.
+
+Árbol de excepciones:
+
+    SoftwareFJError                      (error base del sistema)
+    ├── ClienteInvalidoError             (datos de cliente incorrectos)
+    │   └── ClienteDuplicadoError        (documento ya registrado)
+    ├── ServicioInvalidoError            (servicio mal creado)
+    ├── ParametroInvalidoError           (un parámetro tiene un valor malo)
+    │   └── ParametroFaltanteError       (falta un parámetro obligatorio)
+    ├── ServicioNoDisponibleError        (el servicio está ocupado o apagado)
+    ├── CalculoInconsistenteError        (el costo no tiene sentido)
+    ├── ReservaError                     (la reserva no se pudo crear/cambiar)
+    └── OperacionNoPermitidaError        (acción prohibida en ese estado)
 """
 
 
 class SoftwareFJError(Exception):
-    """Excepción base de todo el sistema Software FJ.
+    """Error base: todas las demás excepciones del sistema heredan de esta.
+    Gracias a eso, con un solo `except SoftwareFJError` se atrapa cualquiera."""
 
-    El atributo 'registrada' indica si el error ya quedó escrito en el archivo
-    de logs (lo marca Logger.registrar_error). Así se evita registrar dos veces
-    el mismo error cuando atraviesa varias capas del sistema.
-    """
-
+    # Marca para no escribir el mismo error dos veces en el archivo de logs.
+    # False = "todavía no se ha escrito en el log".
     registrada = False
 
 
 class ClienteInvalidoError(SoftwareFJError):
-    """Se lanza cuando los datos de un cliente no cumplen las validaciones."""
+    """Los datos del cliente (nombre, documento, correo, teléfono) son malos."""
 
 
 class ClienteDuplicadoError(ClienteInvalidoError):
-    """Se lanza cuando se intenta registrar un cliente con un documento que
-    ya existe (es un caso particular de cliente inválido)."""
+    """Se intentó registrar un cliente con un documento que ya existe."""
 
 
 class ServicioInvalidoError(SoftwareFJError):
-    """Se lanza cuando un servicio se intenta crear con datos incorrectos."""
+    """El servicio se creó mal (tarifa negativa, nombre vacío, etc.)."""
 
 
 class ParametroInvalidoError(SoftwareFJError):
-    """Se lanza cuando un parámetro (duración, cantidad, etc.) es inválido."""
+    """Un parámetro existe pero su valor no sirve (ej.: duración negativa)."""
 
 
 class ParametroFaltanteError(ParametroInvalidoError):
-    """Se lanza cuando falta un parámetro obligatorio (es un caso particular
-    de parámetro inválido, por eso hereda de ParametroInvalidoError)."""
+    """No se envió un parámetro obligatorio (ej.: 'asistentes' en una sala)."""
 
 
 class ServicioNoDisponibleError(SoftwareFJError):
-    """Se lanza cuando se intenta reservar un servicio no disponible."""
-
-
-class OperacionNoPermitidaError(SoftwareFJError):
-    """Se lanza cuando una operación no es válida para el estado actual
-    (por ejemplo, procesar una reserva cancelada)."""
+    """El servicio no se puede reservar porque está ocupado o desactivado."""
 
 
 class CalculoInconsistenteError(SoftwareFJError):
-    """Se lanza cuando un cálculo de costos produce valores inconsistentes."""
+    """El cálculo del costo da algo ilógico (descuento fuera de tope, total <= 0)."""
 
 
 class ReservaError(SoftwareFJError):
-    """Error general de una reserva. Se usa para ENCADENAR excepciones:
-    envuelve el error original usando 'raise ReservaError(...) from error'."""
+    """No se pudo crear, confirmar, cancelar o procesar una reserva."""
+
+
+class OperacionNoPermitidaError(SoftwareFJError):
+    """La acción no se puede hacer en el estado actual (ej.: procesar una
+    reserva que ya está cancelada)."""
